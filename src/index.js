@@ -12,70 +12,73 @@ app.listen(port, () =>{
 
 app.use(express.json())
 
-app.post("/task",(request,response)=>{
+app.post("/task", async (request,response)=>{
     const tasks = new Task(request.body)
-
-    tasks.save().then(()=>{
+    try{
+        const tasks = await new Task(request.body)
         response.status(201).send(tasks)
-    }).catch((e)=>{
-        response.status(400).send(e)
-    })
-})
-
-app.get("/task",(request,response)=>{
-    Task.find({}).then((tasks)=>{
-        response.send(tasks)
-    }).catch((e)=>{
+    }catch(e){
         response.send(e)
-    })
+    }
 })
 
-app.get("/task/:id", (request,response)=>{
-    const _id = request.params.id
+app.get("/task", async(request,response)=>{
 
-    Task.findById(_id).then((task)=>{
-        if(!task){
-            response.status(404).send()
-        }
-        response.send(task)
-    }).catch((e)=>{
-        response.send(e)
-    })
-})
+    try{
+         const tasks = await Task.find({})
+         response.send(tasks)
+    }catch(e){
 
-
-
-
-
-app.post('/users', (request, response)=>{
-    console.log(request.body)
-    const user = new User(request.body)
-
-    user.save().then(()=>{
-        response.status(201).send(user)
-    }).catch((e)=>{
-        response.status(400).send(e)
-    })    
+    }
     
 })
 
-app.get("/users/:id",(request,response)=>{
+app.get("/task/:id", async (request,response)=>{
     const _id = request.params.id
 
-    User.findById(_id).then((user)=>{
-        if(!user){
-            return response.status(404).send()
-        }
-        response.send(user)
-    }).catch((e)=>{
-        response.status(500).send(e)
-    })
+    try{
+        const task = await Task.findById(_id)
+        if(!task){
+                response.status(404).send()
+                    }
+                    response.send(task)
+
+    }catch(e){
+        response.send(e)
+    }
+
 })
 
-app.get("/users",(request, response)=>{
-    User.find({}).then((users)=>{
-        response.send(users)
-    }).catch((e)=>{
+app.post('/users', async (request, response)=>{
+    console.log(request.body)
+    const user = new User(request.body)
+        try{
+            await user.save()
+            response.status(201).send(user)
+        } catch(e){
+            response.status(400).send(e)
+        }
+})
+
+app.get("/users/:id", async (request,response)=>{
+    const _id = request.params.id
+    try{
+      const foundUser = await User.findById(_id)
+      if(!foundUser){
+        response.status(404).send()
+      }
+      response.send(foundUser)
+    }catch(e){
+        response.status(500).send(e)
+    }
+
+})
+
+app.get("/users", async (request, response)=>{
+    try{
+       const foundUsers = await User.find({})
+       response.send(foundUsers)
+    }catch(e){
         response.status(404).send(e)
-    })
+    }
 })
